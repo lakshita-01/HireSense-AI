@@ -58,3 +58,4 @@ The ATS score is calculated using the following weights:
 ## 💡 Troubleshooting
 - **API Timeout**: Hugging Face free models can "sleep". If you get an error the first time, wait 30 seconds for the model to load and try again.
 - **PDF Extraction**: Ensure the PDF is text-based (not scanned images).
+

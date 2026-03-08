@@ -1,87 +1,139 @@
-import React, { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Points, PointMaterial, Sphere } from '@react-three/drei';
-import * as random from 'maath/random/dist/maath-random.esm';
-import * as THREE from 'three';
-
-function StarField(props) {
-  const ref = useRef();
-  const [sphere] = React.useState(() => random.inSphere(new Float32Array(5000), { radius: 1.5 }));
-
-  useFrame((state, delta) => {
-    ref.current.rotation.x -= delta / 20;
-    ref.current.rotation.y -= delta / 30;
-  });
-
-  return (
-    <group rotation={[0, 0, Math.PI / 4]}>
-      <Points ref={ref} positions={sphere} stride={3} frustumCulled {...props}>
-        <PointMaterial
-          transparent
-          color="#6366f1"
-          size={0.002}
-          sizeAttenuation={true}
-          depthWrite={false}
-        />
-      </Points>
-    </group>
-  );
-}
-
-function FloatingOrb({ position = [0, 0, 0], speed = 2 }) {
-  const ref = useRef();
-  
-  useFrame((state) => {
-    if (ref.current) {
-      ref.current.position.y += Math.sin(state.clock.elapsedTime * speed) * 0.003;
-      ref.current.position.x += Math.cos(state.clock.elapsedTime * speed * 0.7) * 0.003;
-      ref.current.rotation.x += 0.001;
-      ref.current.rotation.y += 0.0015;
-    }
-  });
-
-  return (
-    <group ref={ref} position={position}>
-      <mesh>
-        <sphereGeometry args={[0.15, 32, 32]} />
-        <meshStandardMaterial
-          color="#7c3aed"
-          emissive="#5b21b6"
-          emissiveIntensity={0.3}
-          wireframe={false}
-          transparent
-          opacity={0.3}
-        />
-      </mesh>
-      <mesh scale={1.3}>
-        <sphereGeometry args={[0.15, 32, 32]} />
-        <meshStandardMaterial
-          color="#a78bfa"
-          wireframe
-          transparent
-          opacity={0.15}
-        />
-      </mesh>
-    </group>
-  );
-}
+import React from 'react';
 
 const ThreeBackground = () => {
   return (
-    <div className="fixed inset-0 -z-10">
-      <Canvas 
-        camera={{ position: [0, 0, 1.5] }}
-        gl={{ antialias: true, alpha: true }}
+    <>
+      {/* Animated gradient orbs */}
+      <div 
+        className="fixed inset-0 -z-10 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #030014 0%, #1e1b4b 50%, #312e81 100%)' }}
       >
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={0.5} />
-        <StarField />
-        <FloatingOrb position={[-0.3, 0.2, -0.5]} speed={1.5} />
-        <FloatingOrb position={[0.4, -0.1, -0.3]} speed={1.8} />
-        <FloatingOrb position={[0, 0.4, -0.8]} speed={1.2} />
-      </Canvas>
-    </div>
+        {/* Orb 1 */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: '10%',
+            left: '10%',
+            width: '400px',
+            height: '400px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            animation: 'float 8s ease-in-out infinite',
+          }}
+        />
+        
+        {/* Orb 2 */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: '20%',
+            right: '10%',
+            width: '350px',
+            height: '350px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            animation: 'float 10s ease-in-out infinite reverse',
+          }}
+        />
+        
+        {/* Orb 3 */}
+        <div 
+          style={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '30%',
+            width: '300px',
+            height: '300px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.25) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+            animation: 'float 12s ease-in-out infinite',
+            animationDelay: '2s',
+          }}
+        />
+        
+        {/* Orb 4 */}
+        <div 
+          style={{
+            position: 'absolute',
+            bottom: '20%',
+            right: '20%',
+            width: '250px',
+            height: '250px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, transparent 70%)',
+            filter: 'blur(40px)',
+            animation: 'float 9s ease-in-out infinite reverse',
+            animationDelay: '1s',
+          }}
+        />
+        
+        {/* Star-like particles (CSS only) */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                width: Math.random() * 3 + 1 + 'px',
+                height: Math.random() * 3 + 1 + 'px',
+                background: 'white',
+                borderRadius: '50%',
+                left: Math.random() * 100 + '%',
+                top: Math.random() * 100 + '%',
+                opacity: Math.random() * 0.5 + 0.2,
+                animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                animationDelay: Math.random() * 2 + 's',
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Grid pattern overlay */}
+        <div 
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `
+              linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            opacity: 0.5,
+          }}
+        />
+      </div>
+      
+      {/* CSS keyframes injection */}
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(20px, -30px) scale(1.05);
+          }
+          66% {
+            transform: translate(-15px, 15px) scale(0.95);
+          }
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.2);
+          }
+        }
+      `}</style>
+    </>
   );
 };
 
 export default ThreeBackground;
+

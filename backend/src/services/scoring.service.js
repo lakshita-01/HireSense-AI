@@ -7,24 +7,31 @@ export const calculateATSScore = (analysisData) => {
     formatting: 0.10
   };
 
-  // 1. Keyword Score
-  const keywordScore = Math.min((analysisData.matchCount / Math.max(analysisData.requiredCount, 1)) * 100, 100);
+  // Ensure analysisData has required properties
+  const text = analysisData.text || '';
+  const matchCount = analysisData.matchCount || 0;
+  const requiredCount = analysisData.requiredCount || 1;
+  const similarity = typeof analysisData.similarity === 'number' ? analysisData.similarity : 0;
 
-  // 2. Semantic Score
-  const semanticScore = analysisData.similarity * 100;
+  // 1. Keyword Score (35%)
+  const keywordScore = Math.min((matchCount / Math.max(requiredCount, 1)) * 100, 100);
 
-  // 3. Impact Metrics (Checking for numbers/percentages in text)
-  const hasImpact = /[0-9]%|[0-9]+ (users|increase|revenue|reduction|customers|growth)/gi.test(analysisData.text);
+  // 2. Semantic Score (25%) - similarity is already 0-1, convert to 0-100
+  const semanticScore = similarity * 100;
+
+  // 3. Impact Metrics (15%) - Checking for numbers/percentages in text
+  const hasImpact = /[0-9]%|[0-9]+ (users|increase|revenue|reduction|customers|growth|improved|reduced|saved|generated|led|managed|created|developed)/gi.test(text);
   const impactScore = hasImpact ? 100 : 40;
 
-  // 4. Tech Depth (Checking for complex phrases)
-  const techPhrases = ["architecture", "scale", "optimization", "lead", "implement", "deploy", "design"];
-  const techMatchCount = techPhrases.filter(p => analysisData.text.toLowerCase().includes(p)).length;
+  // 4. Tech Depth (15%) - Checking for complex phrases
+  const techPhrases = ["architecture", "scale", "optimization", "lead", "implement", "deploy", "design", "developed", "engineered", "built", "created", "managed", "system", "platform", "framework", "api", "database", "cloud", "microservices", "agile"];
+  const techMatchCount = techPhrases.filter(p => text.toLowerCase().includes(p)).length;
   const techDepthScore = Math.min((techMatchCount / techPhrases.length) * 100 + 40, 100);
 
-  // 5. Formatting (Basic check)
-  const formattingScore = 95; // Default for parsed PDF
+  // 5. Formatting (10%) - Default high score for parsed documents
+  const formattingScore = 95;
 
+  // Calculate weighted final score
   const finalScore = (
     (keywordScore * weights.keywordMatch) +
     (semanticScore * weights.semanticSimilarity) +
